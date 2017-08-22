@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const character = require('./character');
 
 const roll = (dieType, numberOfTimes) => {
@@ -20,13 +21,13 @@ let commands = {
 	connect() {
 		let result = rolld20();
 		if (result <= 1) {
-			console.log('CRITICAL FAIL');
+			console.log(chalk.bgRed.black('CRITICAL FAIL'));
 		} else if (result < 10) {
-			console.log('FAIL');
+			console.log(chalk.bgRed.black('FAIL'));
 		} else if (result >= 15 && result < 20) {
-			console.log('SUCCESS');
+			console.log(chalk.bgGreen.black('SUCCESS'));
 		} else if (result >= 20) {
-			console.log('CRITICAL SUCCESS');
+			console.log(chalk.bgGreen.black('CRITICAL SUCCESS'));
 		} else {
 			console.log(result);
 		}
