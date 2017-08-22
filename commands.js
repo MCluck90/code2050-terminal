@@ -172,9 +172,18 @@ let commands = {
 		return log(`GP: ${chalk.yellow(total)}`);
 	},
 
-	hp() {
+	hp(modifier) {
+		let activeHP = character.current_hp + character.temporary_hp;
+		let formattedHP;
+		if (activeHP >= 0.75 * character.max_hp) {
+			formattedHP = chalk.green(activeHP);
+		} else if (activeHP >= 0.4 * character.max_hp) {
+			formattedHP = chalk.yellow(activeHP);
+		} else {
+			formattedHP = chalk.red(activeHP);
+		}
 		let temp = (character.temporary_hp) ? `(+${character.temporary_hp})` : '';
-		return log(`${character.current_hp + character.temporary_hp}/${character.max_hp} ${temp}`);
+		return log(`${formattedHP}/${chalk.green(character.max_hp)} ${temp}`);
 	},
 
 	implants() {
