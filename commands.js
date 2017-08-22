@@ -98,7 +98,10 @@ let commands = {
 		if (character.hasOwnProperty(field)) {
 			field = character[field];
 			if (Array.isArray(field)) {
-				return log(field.join('\n'));
+				if (field.length) {
+					return log(field.join('\n'));
+				}
+				return log('--empty--');
 			} else {
 				return log(field);
 			}
@@ -228,6 +231,9 @@ let commands = {
 	},
 
 	roll(stat) {
+		if (!stat) {
+			return log(`Luck: ${rolld20()}`);
+		}
 		stat = stat.toLowerCase();
 		stat = {
 			str: 'strength',
