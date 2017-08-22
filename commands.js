@@ -15,7 +15,25 @@ const roll = (dieType, numberOfTimes) => {
 	}
 };
 
+const proficiencyBonus = () => {
+	let { level } = character;
+	if (level < 5) {
+		return 2;
+	} else if (level < 9) {
+		return 3;
+	} else if (level < 13) {
+		return 4;
+	} else if (level < 17) {
+		return 5;
+	}
+	return 6;
+};
+
 const rolld20 = () => roll(20, 1).sum;
+
+const success = (msg) => chalk.bgGreen.black(msg);
+
+const fail = (msg) => chalk.bgRed.black(msg);
 
 let commands = {
 	/**
@@ -35,18 +53,34 @@ let commands = {
 		}
 	},
 
-	connect() {
+	connect(corpType) {
 		let result = rolld20();
+		let total = result + proficiencyBonus();
+
 		if (result <= 1) {
-			console.log(chalk.bgRed.black('CRITICAL FAIL'));
-		} else if (result < 10) {
-			console.log(chalk.bgRed.black('FAIL'));
-		} else if (result >= 15 && result < 20) {
-			console.log(chalk.bgGreen.black('SUCCESS'));
+			return console.log(fail('CRITICAL FAIL'));
 		} else if (result >= 20) {
-			console.log(chalk.bgGreen.black('CRITICAL SUCCESS'));
+			return console.log(success('CRITICAL SUCCESS'));
+		}
+
+		if (!corpType) {
+			return console.log(`${result} + ${proficiencyBonus()} = ${total}`);
+		}
+		
+		corpType = corpType.toLowerCase();
+		let minRequired = 0;
+		if (corpType === 'small' || corpType === 'medium') {
+			minRequired = 15;
+		} else if (corpType === 'large' || corpType === 'huge') {
+			minRequired = 10;
 		} else {
-			console.log(result);
+			return console.log(`Unknown corp type: ${corpType}. Try small, medium, large, or huge`);
+		}
+
+		if (total < minRequired) {
+			console.log(fail('FAIL'));
+		} else {
+			console.log(success('SUCCESS'));
 		}
 	},
 
@@ -66,6 +100,10 @@ let commands = {
 
 	proficiencies() {
 		console.log(character.proficiencies.join('\n'));
+	},
+
+	proficiency_bonus() {
+		console.log(proficiencyBonus());
 	},
 
 	roll(stat) {
