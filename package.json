@@ -4,6 +4,12 @@
   "version": "1.0.0",
   "description": "Personal terminal for Code:2050",
   "main": "main.js",
+  "author": {
+    "name": "Mike C"
+  },
+  "repository": {
+    "url": "https://github.com/MCluck90/code2050-terminal.git"
+  },
   "scripts": {
     "start": "node main.js"
   },
