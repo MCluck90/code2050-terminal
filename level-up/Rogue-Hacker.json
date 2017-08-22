@@ -1,0 +1,58 @@
+{
+	"3": {
+		"features": ["Computer Literate"]
+	},
+
+	"features": [
+		{
+			"Computer Literate": {
+				"description": [
+					"At level 3 when you choose the Hacker archetype, you gain proficiency with the Computers tool.", 
+					"If you already have this proficiency, you gain proficiency in a tool of your choice.",
+					"",
+					"Additionally, you may use the bonus action granted by your Cunning Action to Connect, Navigate, Launch, or perform computer Skills checks.",
+					"",
+					"You also gain proficiency in a computer language of your choice. You gain a new computer language proficiency at 9th, 13th, and 17th levels.",
+					"",
+					"Finally, whenever you craft computer scripts, you may create 5 + Rogue level gp in value per day spent crafting."
+				],
+				"proficiencies": [
+					{
+						"primary": "Computers",
+						"alternate": {
+							"choice": "tool of your choice"
+						}
+					}
+				]
+			},
+			"Hacker's Rig": {
+				"description": [
+					"At level 3, when you choose the Hacker archetype, you gain proficiency in the Hacker’s Rig",
+					"tool and construct your first Hacker’s Rig. This portable device is a cobbled-together system of tweaked",
+					"",
+					"and modified computer parts specialized for running subversive computer scripts and breaking into secure systems.",
+					"",
+					"When gaining this feature, you may elect to switch one of your Expertise skills to the Hacker’s Rig. Alternatively, you may choose Hacker’s",
+					"Rig when gaining a new Expertise skill.",
+					"",
+					"You may use your Hacker’s Rig proficiency instead of your Computers proficiency whenever your Rig is",
+					"attached to the target device and is activated. For the purposes of latency, the Rig does not constitute an",
+					"additional hop.",
+					"If your Rig is ever destroyed or lost, you must spend 24 hours constructing a new one at a cost of 150 gp",
+					"per Rogue level."
+				],
+				"proficiencies": [
+					"Hacker's Rig"
+				]
+			}
+		}
+	],
+
+	"languages": {
+		"Parfait": "The basic consumer software suite present on every smart device and personal computer.",
+		"BizOS": "The software suite used by businesses and corporations for running their networks and computers.",
+		"Skippy": "The software used by automated systems such as drones, self-driving cars, and consumer robotics.",
+		"SAGaN": "The software used by the educational, scientific, and medical communities. This is also the software used by most cybernetic implants.",
+		"DOMIN-OS": "The software used by the military and government entities."
+	}
+}

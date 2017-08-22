@@ -1,0 +1,72 @@
+{
+	"name": "Hackerman",
+	"level": 3,
+	"race": "Human",
+	"class": "Rogue",
+	"archetype": "Hacker",
+	"alignment": "neutral evil",
+	"features": [
+		"Computer Literate",
+		"Hacker's Rig"
+	],
+	"proficiencies": [
+		"Smartphone",
+		"Submachine Gun",
+		"Grenade",
+		"SAGaN",
+		"Hacker's Rig",
+		"Investigation",
+		"Perception",
+		"Computers",
+		"Smith's tools"
+	],
+	"languages": ["Common", "Parfait", "SAGaN"],
+	"personality_traits": "",
+	"ideals": "",
+	"background": "",
+	"bonds": "",
+	"flaws": "",
+
+	"inspiration": true,
+	"passive_perception": 0,
+	"strength": 10,
+	"dexterity": 10,
+	"constitution": 10,
+	"intelligence": 10,
+	"wisdom": 10,
+	"charisma": 10,
+
+	"armor_class": 12,
+	"total_hp": 36,
+	"current_hp": 20,
+	"temporary_hp": 0,
+	"hit_dice": [2, 8],
+	"death_saves": [],
+
+	"gold": 100,
+	"implants": [
+		{
+			"name": "Mk II Eyeball",
+			"charges": 2
+		}
+	],
+	"drones": [],
+	"vehicles": [],
+	"inventory": [
+		"Smartphone",
+		"Work clothes",
+		"Plaque of Accomplishment",
+		"Laptop",
+		"Tier 1 script",
+		"Common clothes",
+		"Hacker's Rig"
+	],
+	"weapons": [],
+	"actions": [
+		"attack",
+		"connect",
+		"navigate",
+		"launch",
+		"computer_skill"
+	]
+}
