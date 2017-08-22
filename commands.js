@@ -173,17 +173,43 @@ let commands = {
 	},
 
 	hp(modifier) {
-		let activeHP = character.current_hp + character.temporary_hp;
-		let formattedHP;
-		if (activeHP >= 0.75 * character.max_hp) {
-			formattedHP = chalk.green(activeHP);
-		} else if (activeHP >= 0.4 * character.max_hp) {
-			formattedHP = chalk.yellow(activeHP);
-		} else {
-			formattedHP = chalk.red(activeHP);
+		const formatHP = (hp, max) => {
+			if (hp >= 0.75 * max) {
+				return `${chalk.green(hp)}/${max}`;
+			} else if (hp >= 0.4 * max) {
+				return `${chalk.yellow(hp)}/${max}`;
+			}
+			return `${chalk.red(hp)}/${max}`;
 		}
-		let temp = (character.temporary_hp) ? `(+${character.temporary_hp})` : '';
-		return log(`${formattedHP}/${chalk.green(character.max_hp)} ${temp}`);
+
+		if (!modifier) {
+			let activeHP = character.current_hp + character.temporary_hp;
+			let temp = (character.temporary_hp) ? `(+${character.temporary_hp})` : '';
+			return log(`${formatHP(activeHP, character.max_hp)} ${temp}`);
+		}
+
+		let diff = calculateStatModifier(modifier);
+		if (diff === null) {
+			// No modifier, set it directly
+			modifier = parseInt(modifier);
+			log(`Previous HP: ${formatHP(character.current_hp, character.max_hp)}`);
+			character.current_hp = modifier;
+			return log(`HP: ${formatHP(modifier, character.max_hp)}`);
+		}
+
+		if (Number.isNaN(diff)) {
+			return log(`Unknown modifier: ${modifier}. Expected similar to: -10 or +23`);
+		}
+
+		let total = Math.min(character.current_hp + diff, character.max_hp);
+		if (diff > 0) {
+			log(`${character.current_hp} + ${diff}`);
+		} else {
+			log(`${character.current_hp} - ${diff * -1}`);
+		}
+
+		character.current_hp = total;
+		return log(`HP: ${formatHP(total, character.max_hp)}`);
 	},
 
 	implants() {
