@@ -18,6 +18,23 @@ const roll = (dieType, numberOfTimes) => {
 const rolld20 = () => roll(20, 1).sum;
 
 let commands = {
+	/**
+	 * Display a field from the character's data
+	 * @param {string} field Name of the field to show
+	 */
+	_displayData(field) {
+		if (character.hasOwnProperty(field)) {
+			field = character[field];
+			if (Array.isArray(field)) {
+				console.log(field.join('\n'));
+			} else {
+				console.log(field);
+			}
+		} else {
+			console.log('Unknown command: ' + field);
+		}
+	},
+
 	connect() {
 		let result = rolld20();
 		if (result <= 1) {
@@ -35,6 +52,20 @@ let commands = {
 
 	exit() {
 		process.exit(0);
+	},
+
+	gold() {
+		console.log(`GP: ${chalk.yellow(character.gold)}`);
+	},
+
+	implants() {
+		for (let implant of character.implants) {
+			console.log(`${implant.name} - ${implant.charges} charges`);
+		}
+	},
+
+	proficiencies() {
+		console.log(character.proficiencies.join('\n'));
 	},
 
 	roll(stat) {
@@ -64,7 +95,7 @@ let commands = {
 			intelligence,
 			wisdom,
 			charisma
-		} = character.stats;
+		} = character;
 
 		const modifier = (stat) => Math.floor((stat - 10) / 2);
 		console.log(`Strength:     ${strength} - ${modifier(strength)}`);
@@ -76,6 +107,12 @@ let commands = {
 	}
 };
 
-commands.COMMANDS = Object.keys(commands);
+commands.COMMANDS = Object.keys(commands)
+	.concat(Object.keys(character));
+
+commands.COMMANDS = commands.COMMANDS
+	.filter((key, i) => commands.COMMANDS.indexOf(key) === i) // Remove duplicates
+	.filter(key => !key.startsWith('_')) // Ignore private data
+	.sort(); // Sort alphabetically
 
 module.exports = commands;

@@ -18,7 +18,7 @@ rl
 	if (commands[command]) {
 		commands[command](...args);
 	} else {
-		console.log('Unknown command: ' + command);
+		commands._displayData(command);
 	}
 
 	rl.prompt();
