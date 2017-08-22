@@ -78,7 +78,7 @@ let commands = {
 			wis: 'wisdom',
 			cha: 'charisma'
 		}[stat] || stat;
-		stat = character.stats[stat];
+		stat = character[stat];
 		let modifier = Math.floor((stat - 10) / 2);
 		let result = rolld20();
 		console.log(`${result} + ${modifier} = ${result + modifier}`);

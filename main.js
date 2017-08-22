@@ -1,3 +1,5 @@
+'use strict';
+
 const readline = require('readline');
 const autocomplete = require('./autocomplete')
 const commands = require('./commands');
