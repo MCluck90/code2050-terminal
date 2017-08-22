@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "name": "code2050",
+  "version": "1.0.0",
+  "description": "Personal terminal for Code:2050",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "license": "MIT",
+  "dependencies": {}
+}
