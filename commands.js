@@ -96,8 +96,33 @@ let commands = {
 		process.exit(0);
 	},
 
-	gold() {
-		console.log(`GP: ${chalk.yellow(character.gold)}`);
+	gold(modifier) {
+		let currentGold = chalk.yellow(character.gold);
+		if (!modifier) {
+			return console.log(`GP: ${currentGold}`);
+		}
+
+		let diff = 0;
+		if (modifier[0] === '+') {
+			diff = parseInt(modifier.substr(1));
+		} else if (modifier[0] === '-') {
+			diff = -parseInt(modifier.substr(1));
+		} else {
+			modifier = parseInt(modifier);
+			console.log(`Previous GP: ${character.gold}`);
+			character.gold = modifier;
+			return console.log(`GP: ${chalk.yellow(modifier)}`);
+		}
+
+		let total = character.gold + diff;
+		if (diff > 0) {
+			console.log(`${character.gold} + ${diff}`);
+		} else {
+			console.log(`${character.gold} - ${diff * -1}`);
+		}
+
+		console.log(`GP: ${chalk.yellow(total)}`);
+		character.gold = total;
 	},
 
 	implants() {
