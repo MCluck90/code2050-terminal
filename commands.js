@@ -1,6 +1,22 @@
 const chalk = require('chalk');
 const character = require('./character');
 
+const calculateStatModifier = (modifier) => {
+	if (modifier[0] === '+') {
+		return parseInt(modifier.substr(1));
+	}
+	
+	if (modifier[0] === '-') {
+		return -parseInt(modifier.substr(1));
+	}
+
+	if (!Number.isNaN(parseInt(modifier))) {
+		return null;
+	}
+
+	return NaN;
+}
+
 const roll = (dieType, numberOfTimes) => {
 	let results = [];
 	for (let i = 0; i < numberOfTimes; i++) {
@@ -132,16 +148,17 @@ let commands = {
 			return log(`GP: ${currentGold}`);
 		}
 
-		let diff = 0;
-		if (modifier[0] === '+') {
-			diff = parseInt(modifier.substr(1));
-		} else if (modifier[0] === '-') {
-			diff = -parseInt(modifier.substr(1));
-		} else {
+		let diff = calculateStatModifier(modifier);
+		if (diff === null) {
+			// No modifier, set it directly
 			modifier = parseInt(modifier);
 			log(`Previous GP: ${character.gold}`);
 			character.gold = modifier;
 			return log(`GP: ${chalk.yellow(modifier)}`);
+		}
+
+		if (Number.isNaN(diff)) {
+			return log(`Unknown modifier: ${modifier}. Expected similar to: -10 or +23`);
 		}
 
 		let total = character.gold + diff;
