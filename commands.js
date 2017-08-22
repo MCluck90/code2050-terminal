@@ -15,7 +15,14 @@ const roll = (dieType, numberOfTimes) => {
 	}
 };
 
-const proficiencyBonus = () => {
+const isProficient = (skill) => character
+	.proficiencies
+	.some(proficient => proficient.toLowerCase() === skill.toLowerCase());
+
+const proficiencyBonus = (skill) => {
+	if (!isProficient(skill)) {
+		return 0;
+	}
 	let { level } = character;
 	if (level < 5) {
 		return 2;
@@ -55,7 +62,8 @@ let commands = {
 
 	connect(corpType) {
 		let result = rolld20();
-		let total = result + proficiencyBonus();
+		let bonus = proficiencyBonus('Computers');
+		let total = result + bonus;
 
 		if (result <= 1) {
 			return console.log(fail('CRITICAL FAIL'));
@@ -64,7 +72,7 @@ let commands = {
 		}
 
 		if (!corpType) {
-			return console.log(`${result} + ${proficiencyBonus()} = ${total}`);
+			return console.log(`${result} + ${bonus} = ${total}`);
 		}
 		
 		corpType = corpType.toLowerCase();
