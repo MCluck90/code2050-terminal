@@ -12,18 +12,30 @@ const rl = readline.createInterface({
 
 rl.prompt();
 
+let outputPromise = null;
+
 rl
 .on('line', (line) => {
+	if (outputPromise) {
+		return;
+	}
 	line = line.trim();
 	let [command, ...args] = line.split(' ');
 	
 	if (commands[command]) {
-		commands[command](...args);
+		outputPromise = commands[command](...args);
 	} else {
-		commands._displayData(command);
+		outputPromise = commands._displayData(command);
 	}
 
-	rl.prompt();
+	if (outputPromise) {
+		outputPromise.then(() => {
+			outputPromise = null;
+			rl.prompt();
+		});
+	} else {
+		rl.prompt();
+	}
 })
 .on('close', () => {
 	process.exit(0);

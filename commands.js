@@ -20,7 +20,7 @@ const isProficient = (skill) => character
 	.some(proficient => proficient.toLowerCase() === skill.toLowerCase());
 
 const proficiencyBonus = (skill) => {
-	if (!isProficient(skill)) {
+	if (skill && !isProficient(skill)) {
 		return 0;
 	}
 	let { level } = character;
@@ -42,6 +42,37 @@ const success = (msg) => chalk.bgGreen.black(msg);
 
 const fail = (msg) => chalk.bgRed.black(msg);
 
+let _logIndex = 0;
+let _logMsg = '';
+let _logPromise = null;
+const log = (msg, newline = true) => {
+	if (msg === undefined) {
+		return _logPromise;
+	}
+
+	_logMsg += msg + ((newline) ? '\n' : '');
+	if (!_logPromise) {
+		_logPromise = new Promise((resolve) => {
+			_logIndex = 0;
+
+			function printCharacter() {
+				if (_logIndex >= _logMsg.length) {
+					_logIndex = 0;
+					_logMsg = '';
+					_logPromise = null;
+					return resolve();
+				}
+
+				process.stdout.write(_logMsg[_logIndex++]);
+				setTimeout(printCharacter, 20);
+			}
+			setTimeout(printCharacter, 0);
+		});
+	}
+
+	return _logPromise;
+};
+
 let commands = {
 	/**
 	 * Display a field from the character's data
@@ -51,12 +82,12 @@ let commands = {
 		if (character.hasOwnProperty(field)) {
 			field = character[field];
 			if (Array.isArray(field)) {
-				console.log(field.join('\n'));
+				return log(field.join('\n'));
 			} else {
-				console.log(field);
+				return log(field);
 			}
 		} else {
-			console.log('Unknown command: ' + field);
+			return log('Unknown command: ' + field);
 		}
 	},
 
@@ -66,13 +97,13 @@ let commands = {
 		let total = result + bonus;
 
 		if (result <= 1) {
-			return console.log(fail('CRITICAL FAIL'));
+			return log(fail('CRITICAL FAIL'));
 		} else if (result >= 20) {
-			return console.log(success('CRITICAL SUCCESS'));
+			return log(success('CRITICAL SUCCESS'));
 		}
 
 		if (!corpType) {
-			return console.log(`${result} + ${bonus} = ${total}`);
+			return log(`${result} + ${bonus} = ${total}`);
 		}
 		
 		corpType = corpType.toLowerCase();
@@ -82,14 +113,13 @@ let commands = {
 		} else if (corpType === 'large' || corpType === 'huge') {
 			minRequired = 10;
 		} else {
-			return console.log(`Unknown corp type: ${corpType}. Try small, medium, large, or huge`);
+			return log(`Unknown corp type: ${corpType}. Try small, medium, large, or huge`);
 		}
 
 		if (total < minRequired) {
-			console.log(fail('FAIL'));
-		} else {
-			console.log(success('SUCCESS'));
+			return log(fail('FAIL'));
 		}
+		return log(success('SUCCESS'));
 	},
 
 	exit() {
@@ -99,7 +129,7 @@ let commands = {
 	gold(modifier) {
 		let currentGold = chalk.yellow(character.gold);
 		if (!modifier) {
-			return console.log(`GP: ${currentGold}`);
+			return log(`GP: ${currentGold}`);
 		}
 
 		let diff = 0;
@@ -109,34 +139,40 @@ let commands = {
 			diff = -parseInt(modifier.substr(1));
 		} else {
 			modifier = parseInt(modifier);
-			console.log(`Previous GP: ${character.gold}`);
+			log(`Previous GP: ${character.gold}`);
 			character.gold = modifier;
-			return console.log(`GP: ${chalk.yellow(modifier)}`);
+			return log(`GP: ${chalk.yellow(modifier)}`);
 		}
 
 		let total = character.gold + diff;
 		if (diff > 0) {
-			console.log(`${character.gold} + ${diff}`);
+			log(`${character.gold} + ${diff}`);
 		} else {
-			console.log(`${character.gold} - ${diff * -1}`);
+			log(`${character.gold} - ${diff * -1}`);
 		}
 
-		console.log(`GP: ${chalk.yellow(total)}`);
 		character.gold = total;
+		return log(`GP: ${chalk.yellow(total)}`);
+	},
+
+	hp() {
+		let temp = (character.temporary_hp) ? `(+${character.temporary_hp})` : '';
+		return log(`${character.current_hp + character.temporary_hp}/${character.max_hp} ${temp}`);
 	},
 
 	implants() {
 		for (let implant of character.implants) {
-			console.log(`${implant.name} - ${implant.charges} charges`);
+			log(`${implant.name} - ${implant.charges} charges`);
 		}
+		return log();
 	},
 
 	proficiencies() {
-		console.log(character.proficiencies.join('\n'));
+		return log(character.proficiencies.join('\n'));
 	},
 
 	proficiency_bonus() {
-		console.log(proficiencyBonus());
+		return log(proficiencyBonus());
 	},
 
 	roll(stat) {
@@ -152,7 +188,7 @@ let commands = {
 		stat = character[stat];
 		let modifier = Math.floor((stat - 10) / 2);
 		let result = rolld20();
-		console.log(`${result} + ${modifier} = ${result + modifier}`);
+		return log(`${result} + ${modifier} = ${result + modifier}`);
 	},
 
 	/**
@@ -169,12 +205,13 @@ let commands = {
 		} = character;
 
 		const modifier = (stat) => Math.floor((stat - 10) / 2);
-		console.log(`Strength:     ${strength} - ${modifier(strength)}`);
-		console.log(`Dexterity:    ${dexterity} - ${modifier(dexterity)}`);
-		console.log(`Constitution: ${constitution} - ${modifier(constitution)}`);
-		console.log(`Intelligence: ${intelligence} - ${modifier(intelligence)}`);
-		console.log(`Wisdom:       ${wisdom} - ${modifier(wisdom)}`);
-		console.log(`Charisma:     ${charisma} - ${modifier(charisma)}`);
+		log(`Strength:     ${strength} - ${modifier(strength)}`);
+		log(`Dexterity:    ${dexterity} - ${modifier(dexterity)}`);
+		log(`Constitution: ${constitution} - ${modifier(constitution)}`);
+		log(`Intelligence: ${intelligence} - ${modifier(intelligence)}`);
+		log(`Wisdom:       ${wisdom} - ${modifier(wisdom)}`);
+		log(`Charisma:     ${charisma} - ${modifier(charisma)}`);
+		return log();
 	}
 };
 
