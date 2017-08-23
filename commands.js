@@ -511,6 +511,18 @@ let commands = {
 		log(`Wisdom:       ${f(wisdom)} -   ${modifier(wisdom)}`);
 		log(`Charisma:     ${f(charisma)} -   ${modifier(charisma)}`);
 		return log();
+	},
+
+	weapons() {
+		let weapons = character.weapons;
+		Object.keys(weapons)
+			.map(name => Object.assign({}, weapons[name], { name }))
+			.forEach(weapon => {
+				log(`${weapon.name}: ${weapon.stat} - ${weapon.dice[0]}d${weapon.dice[1]}`);
+				log(`- ${weapon.description[0]}`);
+				weapon.description.slice(1).forEach(line => log(`  ${line}`));
+			});
+		return log();
 	}
 };
 

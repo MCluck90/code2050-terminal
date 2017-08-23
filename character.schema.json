@@ -62,7 +62,15 @@
 		"Common clothes",
 		"Hacker's Rig"
 	],
-	"weapons": [],
+	"weapons": {
+		"Unarmed": {
+			"description": ["Strike with a part of the body"],
+			"base_damage": 0,
+			"stat": "STR",
+			"dice": [1, 4],
+			"dmg_type": "sum"
+		}
+	},
 	"actions": [
 		"attack",
 		"connect",
