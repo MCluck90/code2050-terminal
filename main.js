@@ -2,6 +2,7 @@
 
 const chalk = require('chalk');
 const readline = require('readline');
+const parseSentence = require('minimist-string');
 const autocomplete = require('./autocomplete')
 const character = require('./character');
 const commands = require('./commands');
@@ -57,13 +58,21 @@ function start() {
 		if (outputPromise) {
 			return;
 		}
+
 		line = line.trim();
-		let [command, ...args] = line.split(' ');
-		
+		let sentence = parseSentence(line);
+		let command = sentence._[0];
+		let positionalArgs = sentence._.slice(1);
+		let flags = Object.assign({}, sentence);
+		delete flags._;
+		let negativeModifier = line.match(/-\d+/);
+		if (negativeModifier) {
+			positionalArgs.unshift(negativeModifier[0]);
+		}
 		if (commands[command]) {
-			outputPromise = commands[command](...args);
+			outputPromise = commands[command](flags, ...positionalArgs);
 		} else {
-			outputPromise = commands._displayData(command);
+			outputPromise = commands._displayData(command, flags, ...positionalArgs);
 		}
 
 		if (outputPromise) {

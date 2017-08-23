@@ -117,6 +117,9 @@ let commands = {
 				}
 				return log('--empty--');
 			} else {
+				if (field === null || field === undefined || field.length === 0) {
+					return log('--empty--');
+				}
 				return log(field);
 			}
 		} else {
@@ -124,7 +127,7 @@ let commands = {
 		}
 	},
 
-	connect(corpType) {
+	connect(flags, corpType) {
 		let result = rolld20();
 		let bonus = proficiencyBonus('Computers');
 		let total = result + bonus;
@@ -159,7 +162,7 @@ let commands = {
 		process.exit(0);
 	},
 
-	gold(modifier) {
+	gold(flags, modifier) {
 		let currentGold = chalk.yellow(character.gold);
 		if (!modifier) {
 			return log(`GP: ${currentGold}`);
@@ -189,7 +192,7 @@ let commands = {
 		return log(`GP: ${chalk.yellow(total)}`);
 	},
 
-	hp(modifier) {
+	hp(flags, modifier) {
 		const formatHP = (hp, max) => {
 			if (hp >= 0.75 * max) {
 				return `${chalk.green(hp)}/${max}`;
@@ -244,7 +247,7 @@ let commands = {
 		return log(proficiencyBonus());
 	},
 
-	roll(stat) {
+	roll(flags, stat) {
 		if (!stat) {
 			return log(`Luck: ${rolld20()}`);
 		}
@@ -293,7 +296,7 @@ let commands = {
 		}
 
 		if (shortFormToLong[stat]) {
-			stat = character[shortFormToLong[stat]];
+			stat = shortFormToLong[stat];
 		}
 
 		stat = character[stat];
