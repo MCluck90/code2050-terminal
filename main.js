@@ -6,6 +6,7 @@ const parseSentence = require('minimist-string');
 const autocomplete = require('./autocomplete')
 const character = require('./character');
 const commands = require('./commands');
+const log = require('./logger');
 const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout,
@@ -13,34 +14,21 @@ const rl = readline.createInterface({
 	completer: autocomplete
 });
 
-function asyncMessage(message, delay, next, index = 0) {
-	if (index >= message.length) {
-		console.log('');
-		return next();
-	}
+const createDots = (n) => new Array(n).fill('.').join('');
+const bootstep = (title, dots, delay) => () => {
+	process.stdout.write(title);
+	return log(createDots(dots) + ' ', false, delay)
+		.then(() => log.success('OK'));
+};
 
-	process.stdout.write(message[index]);
-	setTimeout(() => asyncMessage(message, delay, next, index + 1), delay);
-}
-
-function asyncDots(initialMessage, countdown, next, delay) {
-	if (initialMessage) {
-		process.stdout.write(initialMessage);
-	}
-	if (countdown <= 0) {
-		console.log(` ${chalk.bgGreen.black('OK')}`);
-		return next();
-	}
-
-	process.stdout.write('.');
-	setTimeout(() => asyncDots(false, countdown - 1, next, delay), delay);
-}
-
-const greetUser = () => asyncMessage(`Welcome back, ${character.name}`, 75, start);
-const launchTerminal = () => asyncDots('Launching terminal', 8, greetUser, 200);
-const connectToNetwork = () => asyncDots('Connecting to network', 5, launchTerminal, 300);
-const activateDaemon = () => asyncDots('Activating daemon', 9, connectToNetwork, 100);
-const initializeOS = () => asyncDots('Initializing OS', 11, activateDaemon, 200);
+const initializeOS = () => {
+	bootstep('Initializing OS', 11, 200)()
+		.then(bootstep('Activating daemon', 9, 100))
+		.then(bootstep('Connecting to network', 5, 300))
+		.then(bootstep('Launching terminal', 8, 200))
+		.then(() => log(`Welcome back, ${character.name}`, true, 75))
+		.then(start);
+};
 
 if (process.argv.indexOf('--fast-boot') > -1 || process.argv.indexOf('-f') > -1) {
 	start();
