@@ -58,6 +58,20 @@ const success = (msg) => chalk.bgGreen.black(msg);
 
 const fail = (msg) => chalk.bgRed.black(msg);
 
+const formatNumber = (x) => {
+	let result;
+	if (x < 0) {
+		result = '-';
+		x = Math.abs(x);
+	} else {
+		result = ' ';
+	}
+
+	result += (x < 10)  ? `00${x}` :
+						(x < 100) ? `0${x}`  : x;
+	return result;
+};
+
 let _logIndex = 0;
 let _logMsg = '';
 let _logPromise = null;
@@ -262,13 +276,20 @@ let commands = {
 			charisma
 		} = character;
 
-		const modifier = (stat) => Math.floor((stat - 10) / 2);
-		log(`Strength:     ${strength} - ${modifier(strength)}`);
-		log(`Dexterity:    ${dexterity} - ${modifier(dexterity)}`);
-		log(`Constitution: ${constitution} - ${modifier(constitution)}`);
-		log(`Intelligence: ${intelligence} - ${modifier(intelligence)}`);
-		log(`Wisdom:       ${wisdom} - ${modifier(wisdom)}`);
-		log(`Charisma:     ${charisma} - ${modifier(charisma)}`);
+		const f = formatNumber;
+		const modifier = (stat) => {
+			let result = Math.floor((stat - 10) / 2);
+			if (result >= 0) {
+				return ` ${result}`;
+			}
+			return result;
+		};
+		log(`Strength:     ${f(strength)} -   ${modifier(strength)}`);
+		log(`Dexterity:    ${f(dexterity)} -   ${modifier(dexterity)}`);
+		log(`Constitution: ${f(constitution)} -   ${modifier(constitution)}`);
+		log(`Intelligence: ${f(intelligence)} -   ${modifier(intelligence)}`);
+		log(`Wisdom:       ${f(wisdom)} -   ${modifier(wisdom)}`);
+		log(`Charisma:     ${f(charisma)} -   ${modifier(charisma)}`);
 		return log();
 	}
 };
