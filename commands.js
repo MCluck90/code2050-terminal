@@ -31,6 +31,18 @@ const roll = (dieType, numberOfTimes) => {
 	}
 };
 
+const displayRoll = (result, modifier, proficiency) => {
+	if (result === 20) {
+		return log(success('CRITICAL SUCCESS'));
+	} else if (result === 1) {
+		return log(fail('CRITICAL FAIL'));
+	}
+	if (proficiency) {
+		return log(`R:${result} + M:${modifier} + P:${proficiency} = ${result + modifier + proficiency}`);
+	}
+	return log(`R:${result} + M:${modifier} = ${result + modifier}`);
+};
+
 const isProficient = (skill) => character
 	.proficiencies
 	.some(proficient => proficient.toLowerCase() === skill.toLowerCase());
@@ -457,6 +469,22 @@ let commands = {
 		if (!stat) {
 			return log(`Luck: ${rolld20()}`);
 		}
+
+		flags.inspiration = flags.i;
+		flags.advantage = flags.a;
+		flags.disadvantage = flags.d;
+
+		// Using inspiration
+		if (flags.inspiration) {
+			if (!character.inspiration) {
+				return log(`You do not have inspiration`);
+			}
+
+			character.inspiration = false;
+		}
+		if (flags.advantage && flags.disadvantage) {
+			return log('Cannot roll with disadvantage and advantage at the same time');
+		}
 		stat = stat.toLowerCase();
 
 		const shortFormToLong = {
@@ -506,13 +534,27 @@ let commands = {
 			stat = shortFormToLong[stat];
 		}
 
+		if (!character.hasOwnProperty(stat)) {
+			return log(`Unknown stat: ${stat}`);
+		}
 		stat = character[stat];
 		let modifier = Math.floor((stat - 10) / 2);
-		let result = rolld20();
-		if (proficiency) {
-			return log(`R:${result} + M:${modifier} + P:${proficiency} = ${result + modifier + proficiency}`);
+
+		// Does the player have advantage/disadvantage?
+		if (flags.advantage || flags.disadvantage) {
+			let results = [rolld20(), rolld20()];
+			let selected;
+			if (flags.advantage) {
+				selected = Math.max(...results);
+			} else {
+				selected = Math.min(...results);
+			}
+
+			log(`Rolls: ${results.join(', ')}`);
+			return displayRoll(selected, modifier, proficiency);
 		}
-		return log(`R:${result} + M:${modifier} = ${result + modifier}`);
+		let result = rolld20();
+		return displayRoll(result, modifier, proficiency);
 	},
 	
 	seek(flags, corpType) {
