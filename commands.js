@@ -249,18 +249,60 @@ let commands = {
 			return log(`Luck: ${rolld20()}`);
 		}
 		stat = stat.toLowerCase();
-		stat = {
+
+		const shortFormToLong = {
 			str: 'strength',
 			dex: 'dexterity',
 			con: 'constitution',
 			int: 'intelligence',
 			wis: 'wisdom',
 			cha: 'charisma'
-		}[stat] || stat;
+		};
+
+		const subSkillLookup = {
+			strength_save: 'strength',
+			athletics: 'strength',
+			dexterity_save: 'dexterity',
+			acrobatics: 'dexterity',
+			sleight_of_hand: 'dexterity',
+			stealth: 'dexterity',
+			constitution_save: 'constitution',
+			intelligence_save: 'intelligence',
+			arcana: 'intelligence',
+			history: 'intelligence',
+			investigation: 'intelligence',
+			nature: 'intelligence',
+			religion: 'intelligence',
+			wisdom_save: 'wisdom',
+			animal_handling: 'wisdom',
+			insight: 'wisdom',
+			medicine: 'wisdom',
+			perception: 'wisdom',
+			survival: 'wisdom',
+			charisma_save: 'charisma',
+			deception: 'charisma',
+			intimidation: 'charisma',
+			performance: 'charisma',
+			persuasion: 'charisma'
+		};
+
+		let proficiency = 0;
+		if (subSkillLookup[stat]) {
+			proficiency = proficiencyBonus(stat.replace('_', ' '));
+			stat = subSkillLookup[stat];
+		}
+
+		if (shortFormToLong[stat]) {
+			stat = character[shortFormToLong[stat]];
+		}
+
 		stat = character[stat];
 		let modifier = Math.floor((stat - 10) / 2);
 		let result = rolld20();
-		return log(`${result} + ${modifier} = ${result + modifier}`);
+		if (proficiency) {
+			return log(`R:${result} + M:${modifier} + P:${proficiency} = ${result + modifier + proficiency}`);
+		}
+		return log(`R:${result} + M:${modifier} = ${result + modifier}`);
 	},
 
 	/**
