@@ -377,6 +377,54 @@ let commands = {
 		return log();
 	},
 
+	ls() {
+		const cmds = commands.COMMANDS;
+		const width = cmds.reduce((a, b) => a.length > b.length ? a : b).length + 2;
+		const columns = process.stdout.columns;
+		const maxColumns = Math.floor(columns / width);
+		if (!maxColumns || maxColumns === Infinity) {
+			maxColumns = 1;
+		}
+
+		function handleGroup(group, width, maxColumns) {
+			if (group.length === 0) {
+				return;
+			}
+
+			const minRows = Math.ceil(group.length / maxColumns);
+			for (let row = 0; row < minRows; row++) {
+				for (let col = 0; col < maxColumns; col++) {
+					let idx = row * maxColumns + col;
+					if (idx >= group.length) {
+						break;
+					}
+
+					let item = group[idx];
+					log(item, false, 5);
+					if (col < maxColumns - 1) {
+						for (let s = 0; s < width - item.length; s++) {
+							log(' ', false, 5);
+						}
+					}
+				}
+				log('', true, 5);
+			}
+			log('', true, 5);
+		}
+
+		let group = [];
+		cmds.forEach(cmd => {
+			if (cmd === '') {
+				handleGroup(group, width, maxColumns);
+				group = [];
+			} else {
+				group.push(cmd);
+			}
+		})
+		handleGroup(group, width, maxColumns);
+		return log();
+	},
+
 	proficiencies() {
 		return log(character.proficiencies.join('\n'));
 	},
