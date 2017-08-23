@@ -123,6 +123,12 @@ let commands = {
 		return log(field);
 	},
 
+	/**
+	 * Modifies a field
+	 * @param {string} field 
+	 * @param {object} flags 
+	 * @param {string} modifier 
+	 */
 	_modifyField(field, flags, modifier) {
 		let value = character[field];
 		if (typeof value === 'number') {
@@ -152,6 +158,20 @@ let commands = {
 			character[field] = value;
 
 			return log(`${field}: ${value}`);
+		}
+
+		if (typeof value === 'boolean') {
+			let newValue;
+			if (modifier === 1 || modifier === 'true') {
+				newValue = true;
+			} else if (modifier === 0 || modifier === 'false') {
+				newValue = false;
+			} else {
+				return log(`Unexpected argument '${modifier}'. Expected: 1, true, 0, or false`);
+			}
+			log(`Previous ${field}: ${value}`);
+			character[field] = newValue;
+			return log(`${field}: ${newValue}`);
 		}
 
 		return log(`Unable to modify ${field} through this interface`);
