@@ -3,6 +3,7 @@
 const chalk = require('chalk');
 const readline = require('readline');
 const autocomplete = require('./autocomplete')
+const character = require('./character');
 const commands = require('./commands');
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -10,6 +11,16 @@ const rl = readline.createInterface({
 	prompt: '> ',
 	completer: autocomplete
 });
+
+function asyncMessage(message, delay, next, index = 0) {
+	if (index >= message.length) {
+		console.log('');
+		return next();
+	}
+
+	process.stdout.write(message[index]);
+	setTimeout(() => asyncMessage(message, delay, next, index + 1), delay);
+}
 
 function asyncDots(initialMessage, countdown, next, delay) {
 	if (initialMessage) {
@@ -24,11 +35,17 @@ function asyncDots(initialMessage, countdown, next, delay) {
 	setTimeout(() => asyncDots(false, countdown - 1, next, delay), delay);
 }
 
-const launchTerminal = () => asyncDots('Launching terminal', 8, start, 200);
+const greetUser = () => asyncMessage(`Welcome back, ${character.name}`, 75, start);
+const launchTerminal = () => asyncDots('Launching terminal', 8, greetUser, 200);
 const connectToNetwork = () => asyncDots('Connecting to network', 5, launchTerminal, 300);
 const activateDaemon = () => asyncDots('Activating daemon', 9, connectToNetwork, 100);
 const initializeOS = () => asyncDots('Initializing OS', 11, activateDaemon, 200);
-initializeOS();
+
+if (process.argv.indexOf('--fast-boot') > -1 || process.argv.indexOf('-f') > -1) {
+	start();
+} else {
+	initializeOS();
+}
 
 function start() {
 	rl.prompt();
