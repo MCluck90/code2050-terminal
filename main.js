@@ -72,7 +72,7 @@ function start() {
 		if (commands[command]) {
 			outputPromise = commands[command](flags, ...positionalArgs);
 		} else {
-			outputPromise = commands._displayData(command, flags, ...positionalArgs);
+			outputPromise = commands._field(command, flags, ...positionalArgs);
 		}
 
 		if (outputPromise) {

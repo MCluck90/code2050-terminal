@@ -26,6 +26,7 @@
 	"background": "",
 	"bonds": "",
 	"flaws": "",
+	"initiative": 0,
 
 	"inspiration": true,
 	"passive_perception": 0,

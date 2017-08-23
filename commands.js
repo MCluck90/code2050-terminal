@@ -110,17 +110,64 @@ let commands = {
 	 * Display a field from the character's data
 	 * @param {string} field Name of the field to show
 	 */
-	_displayData(field) {
-		if (character.hasOwnProperty(field)) {
-			field = character[field];
-			if (Array.isArray(field)) {
-				return outputArray(field);
+	_displayField(field) {
+		field = character[field];
+		if (Array.isArray(field)) {
+			return outputArray(field);
+		}
+
+		if (field === null || field === undefined || field.length === 0) {
+			return log('--empty--');
+		}
+
+		return log(field);
+	},
+
+	_modifyField(field, flags, modifier) {
+		let value = character[field];
+		if (typeof value === 'number') {
+			log(`Previous ${field}: ${value}`);
+			value = calculateStatModifier(modifier);
+			if (value === null) {
+				value = parseInt(modifier);
 			} else {
-				if (field === null || field === undefined || field.length === 0) {
-					return log('--empty--');
-				}
-				return log(field);
+				value += character[field];
 			}
+
+			character[field] = value;
+
+			return log(`${field}: ${value}`);
+		}
+
+		if (typeof value === 'string') {
+			log(`Previous ${field}: ${value}`);
+			modifier = modifier
+				.replace(/\\r/g, '\r')
+				.replace(/\\n/g, '\n');
+			if (modifier[0] === '+') {
+				value += modifier.slice(1);
+			} else {
+				value = modifier;
+			}
+			character[field] = value;
+
+			return log(`${field}: ${value}`);
+		}
+
+		return log(`Unable to modify ${field} through this interface`);
+	},
+
+	/**
+	 * Display or modify a field from the character's data
+	 * @param {string} field Name of the field to show or modify
+	 */
+	_field(field, flags, ...args) {
+		if (character.hasOwnProperty(field)) {
+			if (args.length === 0) {
+				return commands._displayField(field);
+			}
+
+			return commands._modifyField(field, flags, args[0]);
 		} else {
 			return log('Unknown command: ' + field);
 		}
