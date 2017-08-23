@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const character = require('./character');
+const log = require('./logger');
 
 const calculateStatModifier = (modifier) => {
 	if (modifier[0] === '+') {
@@ -33,9 +34,9 @@ const roll = (dieType, numberOfTimes) => {
 
 const displayRoll = (result, modifier, proficiency = 0, baseDmg = 0, canCrit = true) => {
 	if (canCrit && result === 20) {
-		return log(success('CRITICAL SUCCESS'));
+		return log.criticalSuccess();
 	} else if (canCrit && result === 1) {
-		return log(fail('CRITICAL FAIL'));
+		return log.criticalFail();
 	}
 	let output = `R:${result} + M:${modifier}`;
 	if (proficiency) {
@@ -69,10 +70,6 @@ const proficiencyBonus = (skill) => {
 };
 
 const rolld20 = () => roll(20, 1).sum;
-
-const success = (msg) => chalk.bgGreen.black(msg);
-
-const fail = (msg) => chalk.bgRed.black(msg);
 
 const formatNumber = (x) => {
 	let result;
@@ -146,37 +143,6 @@ const lookupStat = (stat) => {
 };
 
 const calculateModifier = (stat) => Math.floor((stat - 10) / 2);
-
-let _logIndex = 0;
-let _logMsg = '';
-let _logPromise = null;
-const log = (msg, newline = true, delay = 20) => {
-	if (msg === undefined) {
-		return _logPromise;
-	}
-
-	_logMsg += msg + ((newline) ? '\n' : '');
-	if (!_logPromise) {
-		_logPromise = new Promise((resolve) => {
-			_logIndex = 0;
-
-			function printCharacter() {
-				if (_logIndex >= _logMsg.length) {
-					_logIndex = 0;
-					_logMsg = '';
-					_logPromise = null;
-					return resolve();
-				}
-
-				process.stdout.write(_logMsg[_logIndex++]);
-				setTimeout(printCharacter, delay);
-			}
-			setTimeout(printCharacter, 0);
-		});
-	}
-
-	return _logPromise;
-};
 
 const outputArray = (array) => array.length ? log(array.join('\n')) : log('--empty--');
 
@@ -315,9 +281,9 @@ let commands = {
 		let total = result + modifier + bonus;
 
 		if (result <= 1) {
-			return log(fail('CRITICAL FAIL'));
+			return log.criticalFail();
 		} else if (result >= 20) {
-			return log(success('CRITICAL SUCCESS'));
+			return log.criticalSuccess();
 		}
 
 		if (!corpType) {
@@ -335,9 +301,9 @@ let commands = {
 		}
 
 		if (total < minRequired) {
-			return log(fail('FAIL'));
+			return log.fail();
 		}
-		return log(success('SUCCESS'));
+		return log.success();
 	},
 	
 	defeat(flags, corpType) {
@@ -347,9 +313,9 @@ let commands = {
 		let total = result + modifier + bonus;
 
 		if (result <= 1) {
-			return log(fail('CRITICAL FAIL'));
+			return log.criticalFail();
 		} else if (result >= 20) {
-			return log(success('CRITICAL SUCCESS'));
+			return log.criticalSuccess();
 		}
 
 		if (!corpType) {
@@ -371,9 +337,9 @@ let commands = {
 		}
 
 		if (total < minRequired) {
-			return log(fail('FAIL'));
+			return log.fail();
 		}
-		return log(success('SUCCESS'));
+		return log.success();
 	},
 	
 	exfiltrate(flags, corpType) {
@@ -383,9 +349,9 @@ let commands = {
 		let total = result + modifier + bonus;
 
 		if (result <= 1) {
-			return log(fail('CRITICAL FAIL'));
+			return log.criticalFail();
 		} else if (result >= 20) {
-			return log(success('CRITICAL SUCCESS'));
+			return log.criticalSuccess();
 		}
 
 		if (!corpType) {
@@ -407,9 +373,9 @@ let commands = {
 		}
 
 		if (total < minRequired) {
-			return log(fail('FAIL'));
+			return log.fail();
 		}
-		return log(success('SUCCESS'));
+		return log.success();
 	},
 
 	exit() {
@@ -618,9 +584,9 @@ let commands = {
 		let total = result + modifier + bonus;
 
 		if (result <= 1) {
-			return log(fail('CRITICAL FAIL'));
+			return log.criticalFail();
 		} else if (result >= 20) {
-			return log(success('CRITICAL SUCCESS'));
+			return log.criticalSuccess();
 		}
 
 		if (!corpType) {
@@ -642,9 +608,9 @@ let commands = {
 		}
 
 		if (total < minRequired) {
-			return log(fail('FAIL'));
+			return log.fail('FAIL');
 		}
-		return log(success('SUCCESS'));
+		return log.success();
 	},
 
 	/**
