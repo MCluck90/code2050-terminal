@@ -75,7 +75,7 @@ const formatNumber = (x) => {
 let _logIndex = 0;
 let _logMsg = '';
 let _logPromise = null;
-const log = (msg, newline = true) => {
+const log = (msg, newline = true, delay = 20) => {
 	if (msg === undefined) {
 		return _logPromise;
 	}
@@ -94,7 +94,7 @@ const log = (msg, newline = true) => {
 				}
 
 				process.stdout.write(_logMsg[_logIndex++]);
-				setTimeout(printCharacter, 20);
+				setTimeout(printCharacter, delay);
 			}
 			setTimeout(printCharacter, 0);
 		});
@@ -102,6 +102,8 @@ const log = (msg, newline = true) => {
 
 	return _logPromise;
 };
+
+const outputArray = (array) => array.length ? log(array.join('\n')) : log('--empty--');
 
 let commands = {
 	/**
@@ -112,10 +114,7 @@ let commands = {
 		if (character.hasOwnProperty(field)) {
 			field = character[field];
 			if (Array.isArray(field)) {
-				if (field.length) {
-					return log(field.join('\n'));
-				}
-				return log('--empty--');
+				return outputArray(field);
 			} else {
 				if (field === null || field === undefined || field.length === 0) {
 					return log('--empty--');
@@ -160,6 +159,21 @@ let commands = {
 
 	exit() {
 		process.exit(0);
+	},
+
+	features(flags, featureName) {
+		if (!featureName) {
+			return outputArray(character.features);
+		}
+
+		let allFeatures = character._schema.features;
+		let feature = allFeatures[featureName];
+		if (!feature) {
+			return log(`Unknown feature: ${featureName}`);
+		}
+
+		feature.description.forEach(line => log(line, true, 10));
+		return log();
 	},
 
 	gold(flags, modifier) {
