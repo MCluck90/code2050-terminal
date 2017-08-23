@@ -31,16 +31,20 @@ const roll = (dieType, numberOfTimes) => {
 	}
 };
 
-const displayRoll = (result, modifier, proficiency) => {
-	if (result === 20) {
+const displayRoll = (result, modifier, proficiency = 0, baseDmg = 0, canCrit = true) => {
+	if (canCrit && result === 20) {
 		return log(success('CRITICAL SUCCESS'));
-	} else if (result === 1) {
+	} else if (canCrit && result === 1) {
 		return log(fail('CRITICAL FAIL'));
 	}
+	let output = `R:${result} + M:${modifier}`;
 	if (proficiency) {
-		return log(`R:${result} + M:${modifier} + P:${proficiency} = ${result + modifier + proficiency}`);
+		output += ` + P:${proficiency}`;
 	}
-	return log(`R:${result} + M:${modifier} = ${result + modifier}`);
+	if (baseDmg) {
+		output += ` + B:${baseDmg}`;
+	}
+	return log(`${output} = ${result + modifier + proficiency + baseDmg}`);
 };
 
 const isProficient = (skill) => character
@@ -84,6 +88,65 @@ const formatNumber = (x) => {
 	return result;
 };
 
+const lookupStat = (stat) => {
+	stat = stat.toLowerCase();
+	
+	const shortFormToLong = {
+		str: 'strength',
+		dex: 'dexterity',
+		con: 'constitution',
+		int: 'intelligence',
+		wis: 'wisdom',
+		cha: 'charisma'
+	};
+
+	const subSkillLookup = {
+		strength_save: 'strength',
+		athletics: 'strength',
+		dexterity_save: 'dexterity',
+		acrobatics: 'dexterity',
+		sleight_of_hand: 'dexterity',
+		stealth: 'dexterity',
+		constitution_save: 'constitution',
+		intelligence_save: 'intelligence',
+		arcana: 'intelligence',
+		computers: 'intelligence',
+		history: 'intelligence',
+		investigation: 'intelligence',
+		nature: 'intelligence',
+		religion: 'intelligence',
+		wisdom_save: 'wisdom',
+		animal_handling: 'wisdom',
+		insight: 'wisdom',
+		medicine: 'wisdom',
+		perception: 'wisdom',
+		survival: 'wisdom',
+		charisma_save: 'charisma',
+		deception: 'charisma',
+		intimidation: 'charisma',
+		performance: 'charisma',
+		persuasion: 'charisma'
+	};
+
+	let proficiency = 0;
+	if (subSkillLookup[stat]) {
+		proficiency = proficiencyBonus(stat.replace('_', ' '));
+		stat = subSkillLookup[stat];
+	}
+
+	if (shortFormToLong[stat]) {
+		stat = shortFormToLong[stat];
+	}
+
+	if (!character.hasOwnProperty(stat) || typeof character[stat] !== 'number') {
+		return null;
+	}
+
+	return stat;
+};
+
+const calculateModifier = (stat) => Math.floor((stat - 10) / 2);
+
 let _logIndex = 0;
 let _logMsg = '';
 let _logPromise = null;
@@ -117,6 +180,7 @@ const log = (msg, newline = true, delay = 20) => {
 
 const outputArray = (array) => array.length ? log(array.join('\n')) : log('--empty--');
 
+let lastUsedWeapon = null;
 let commands = {
 	/**
 	 * Display a field from the character's data
@@ -203,6 +267,41 @@ let commands = {
 		} else {
 			return log('Unknown command: ' + field);
 		}
+	},
+
+	attack(flags, weapon) {
+		if (!weapon && !lastUsedWeapon) {
+			return log('Please specify a weapon to attack with');
+		}
+
+		if (!weapon) {
+			weapon = lastUsedWeapon;
+			// Inform player which weapon they're using on auto attacks
+			log(`Attacking with: ${weapon.name}`);
+		} else {
+			let weaponLookup = Object.keys(character.weapons)
+				.reduce((lookup, key) => {
+					lookup[key.toLowerCase()] = character.weapons[key];
+					return lookup;
+				}, {});
+
+			if (!weaponLookup.hasOwnProperty(weapon.toLowerCase())) {
+				return log(`Unknown weapon: ${weapon}`);
+			}
+
+			lastUsedWeapon = weapon = weaponLookup[weapon.toLowerCase()];
+		}
+
+		let stat = lookupStat(weapon.stat);
+		if (!stat) {
+			return log(`Unknown stat '${weapon.stat}' associated with weapon '${weapon.name}`);
+		}
+		stat = character[stat];
+		let dice = weapon.dice.slice().reverse();
+		let result = roll(...dice);
+		let proficiency = proficiencyBonus(weapon.weapon_type);
+		log(`Rolls: ${result.rolls.join(', ')}`);
+		return displayRoll(result[weapon.dmg_type], calculateModifier(stat), proficiency, weapon.base_damage, false);
 	},
 
 	clear() {
@@ -485,60 +584,15 @@ let commands = {
 		if (flags.advantage && flags.disadvantage) {
 			return log('Cannot roll with disadvantage and advantage at the same time');
 		}
-		stat = stat.toLowerCase();
+		let statName = stat;
+		stat = lookupStat(stat);
 
-		const shortFormToLong = {
-			str: 'strength',
-			dex: 'dexterity',
-			con: 'constitution',
-			int: 'intelligence',
-			wis: 'wisdom',
-			cha: 'charisma'
-		};
-
-		const subSkillLookup = {
-			strength_save: 'strength',
-			athletics: 'strength',
-			dexterity_save: 'dexterity',
-			acrobatics: 'dexterity',
-			sleight_of_hand: 'dexterity',
-			stealth: 'dexterity',
-			constitution_save: 'constitution',
-			intelligence_save: 'intelligence',
-			arcana: 'intelligence',
-			computers: 'intelligence',
-			history: 'intelligence',
-			investigation: 'intelligence',
-			nature: 'intelligence',
-			religion: 'intelligence',
-			wisdom_save: 'wisdom',
-			animal_handling: 'wisdom',
-			insight: 'wisdom',
-			medicine: 'wisdom',
-			perception: 'wisdom',
-			survival: 'wisdom',
-			charisma_save: 'charisma',
-			deception: 'charisma',
-			intimidation: 'charisma',
-			performance: 'charisma',
-			persuasion: 'charisma'
-		};
-
-		let proficiency = 0;
-		if (subSkillLookup[stat]) {
-			proficiency = proficiencyBonus(stat.replace('_', ' '));
-			stat = subSkillLookup[stat];
+		if (stat === null) {
+			return log(`Unknown stat: ${statName}`);
 		}
-
-		if (shortFormToLong[stat]) {
-			stat = shortFormToLong[stat];
-		}
-
-		if (!character.hasOwnProperty(stat)) {
-			return log(`Unknown stat: ${stat}`);
-		}
+		let proficiency = proficiencyBonus(stat);
 		stat = character[stat];
-		let modifier = Math.floor((stat - 10) / 2);
+		let modifier = calculateModifier(stat);
 
 		// Does the player have advantage/disadvantage?
 		if (flags.advantage || flags.disadvantage) {

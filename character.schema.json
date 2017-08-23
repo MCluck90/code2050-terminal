@@ -64,8 +64,10 @@
 	],
 	"weapons": {
 		"Unarmed": {
+			"name": "Unarmed",
 			"description": ["Strike with a part of the body"],
 			"base_damage": 0,
+			"weapon_type": "Unarmed",
 			"stat": "STR",
 			"dice": [1, 4],
 			"dmg_type": "sum"
