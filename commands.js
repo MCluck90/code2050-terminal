@@ -132,8 +132,9 @@ let commands = {
 
 	connect(flags, corpType) {
 		let result = rolld20();
+		let modifier = Math.floor((character.intelligence - 10) / 2);
 		let bonus = proficiencyBonus('Computers');
-		let total = result + bonus;
+		let total = result + modifier + bonus;
 
 		if (result <= 1) {
 			return log(fail('CRITICAL FAIL'));
@@ -142,7 +143,7 @@ let commands = {
 		}
 
 		if (!corpType) {
-			return log(`${result} + ${bonus} = ${total}`);
+			return log(`R:${result} + M:${modifier} + P:${bonus} = ${total}`);
 		}
 		
 		corpType = corpType.toLowerCase();
@@ -151,6 +152,78 @@ let commands = {
 			minRequired = 15;
 		} else if (corpType === 'large' || corpType === 'huge') {
 			minRequired = 10;
+		} else {
+			return log(`Unknown corp type: ${corpType}. Try small, medium, large, or huge`);
+		}
+
+		if (total < minRequired) {
+			return log(fail('FAIL'));
+		}
+		return log(success('SUCCESS'));
+	},
+	
+	defeat(flags, corpType) {
+		let result = rolld20();
+		let modifier = Math.floor((character.intelligence - 10) / 2);
+		let bonus = proficiencyBonus('Computers');
+		let total = result + modifier + bonus;
+
+		if (result <= 1) {
+			return log(fail('CRITICAL FAIL'));
+		} else if (result >= 20) {
+			return log(success('CRITICAL SUCCESS'));
+		}
+
+		if (!corpType) {
+			return log(`R:${result} + M:${modifier} + P:${bonus} = ${total}`);
+		}
+		
+		corpType = corpType.toLowerCase();
+		let minRequired = 0;
+		if (corpType === 'small') {
+			minRequired = 5;
+		} else if (corpType === 'medium') {
+			minRequired = 10;
+		} else if (corpType === 'large') {
+			minRequired = 15;
+		} else if (corpType === 'huge') {
+			minRequired = 20;
+		} else {
+			return log(`Unknown corp type: ${corpType}. Try small, medium, large, or huge`);
+		}
+
+		if (total < minRequired) {
+			return log(fail('FAIL'));
+		}
+		return log(success('SUCCESS'));
+	},
+	
+	exfiltrate(flags, corpType) {
+		let result = rolld20();
+		let modifier = Math.floor((character.intelligence - 10) / 2);
+		let bonus = proficiencyBonus('Computers');
+		let total = result + modifier + bonus;
+
+		if (result <= 1) {
+			return log(fail('CRITICAL FAIL'));
+		} else if (result >= 20) {
+			return log(success('CRITICAL SUCCESS'));
+		}
+
+		if (!corpType) {
+			return log(`R:${result} + M:${modifier} + P:${bonus} = ${total}`);
+		}
+		
+		corpType = corpType.toLowerCase();
+		let minRequired = 0;
+		if (corpType === 'small') {
+			minRequired = 5;
+		} else if (corpType === 'medium') {
+			minRequired = 10;
+		} else if (corpType === 'large') {
+			minRequired = 15;
+		} else if (corpType === 'huge') {
+			minRequired = 20;
 		} else {
 			return log(`Unknown corp type: ${corpType}. Try small, medium, large, or huge`);
 		}
@@ -290,6 +363,7 @@ let commands = {
 			constitution_save: 'constitution',
 			intelligence_save: 'intelligence',
 			arcana: 'intelligence',
+			computers: 'intelligence',
 			history: 'intelligence',
 			investigation: 'intelligence',
 			nature: 'intelligence',
@@ -324,6 +398,42 @@ let commands = {
 			return log(`R:${result} + M:${modifier} + P:${proficiency} = ${result + modifier + proficiency}`);
 		}
 		return log(`R:${result} + M:${modifier} = ${result + modifier}`);
+	},
+	
+	seek(flags, corpType) {
+		let result = rolld20();
+		let modifier = Math.floor((character.intelligence - 10) / 2);
+		let bonus = proficiencyBonus('Computers');
+		let total = result + modifier + bonus;
+
+		if (result <= 1) {
+			return log(fail('CRITICAL FAIL'));
+		} else if (result >= 20) {
+			return log(success('CRITICAL SUCCESS'));
+		}
+
+		if (!corpType) {
+			return log(`R:${result} + M:${modifier} + P:${bonus} = ${total}`);
+		}
+		
+		corpType = corpType.toLowerCase();
+		let minRequired = 0;
+		if (corpType === 'small') {
+			minRequired = 5;
+		} else if (corpType === 'medium') {
+			minRequired = 10;
+		} else if (corpType === 'large') {
+			minRequired = 15;
+		} else if (corpType === 'huge') {
+			minRequired = 20;
+		} else {
+			return log(`Unknown corp type: ${corpType}. Try small, medium, large, or huge`);
+		}
+
+		if (total < minRequired) {
+			return log(fail('FAIL'));
+		}
+		return log(success('SUCCESS'));
 	},
 
 	/**
