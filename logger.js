@@ -61,5 +61,7 @@ log.success = (msg = 'SUCCESS', newline = true) => log.fast(chalk.bgGreen.black(
 log.criticalSuccess = () => log.success('CRITICAL SUCCESS');
 log.fail = (msg = 'FAIL', newline = true) => log.fast(chalk.bgRed.black(msg), newline);
 log.criticalFail = () => log.fail('CRITICAL FAIL');
+log.ok = (msg, newline, delay) => log(`${chalk.bgGreen.black('OK')} ${msg}`, newline, delay);
+log.error = (msg, newline, delay) => log(`${chalk.bgRed.black('ERR')} ${msg}`, newline, delay);
 
 module.exports = log;

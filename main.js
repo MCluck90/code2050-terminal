@@ -7,12 +7,16 @@ const autocomplete = require('./autocomplete')
 const character = require('./character');
 const commands = require('./commands');
 const log = require('./logger');
+const argv = parseSentence(process.argv.join(' '));
 const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout,
 	prompt: '> ',
 	completer: autocomplete
 });
+
+// Load character data from a given file or the default
+character.load(argv.o || argv.open || './character.json');
 
 const createDots = (n) => new Array(n).fill('.').join('');
 const bootstep = (title, dots, delay) => () => {

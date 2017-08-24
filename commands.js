@@ -1,6 +1,7 @@
 const chalk = require('chalk');
 const character = require('./character');
 const log = require('./logger');
+const Skills = require('./skills');
 
 const calculateStatModifier = (modifier) => {
 	if (modifier[0] === '+') {
@@ -474,6 +475,20 @@ let commands = {
 		return log();
 	},
 
+	/**
+	 * Load character data from a file
+	 * @param {object} flags 
+	 * @param {string} filePath Which file to load
+	 */
+	load(flags, filePath) {
+		if (!filePath) {
+			return log.error('Specify a file to load from');
+		}
+
+		character.load(filePath);
+		return log.ok(`Loaded ${filePath}`);
+	},
+
 	ls() {
 		const cmds = commands.COMMANDS;
 		const width = cmds.reduce((a, b) => a.length > b.length ? a : b).length + 2;
@@ -524,10 +539,6 @@ let commands = {
 
 	proficiencies() {
 		return log(character.proficiencies.join('\n'));
-	},
-
-	proficiency_bonus() {
-		return log(proficiencyBonus());
 	},
 
 	roll(flags, stat) {
@@ -614,17 +625,25 @@ let commands = {
 	},
 
 	/**
+	 * Save current character data to file
+	 * @param {object} flags 
+	 * @param {string} filePath Where to save character data
+	 */
+	save(flags, filePath) {
+		character.save(filePath);
+		return log(`Saved: ${filePath || character._filePath}`);
+	},
+
+	/**
 	 * Print out the players basic stats and modifiers
 	 */
 	stats() {
-		let {
-			strength,
-			dexterity,
-			constitution,
-			intelligence,
-			wisdom,
-			charisma
-		} = character;
+		let strength = Skills.get('strength');
+		let dexterity = Skills.get('dexterity');
+		let constitution = Skills.get('constitution');
+		let intelligence = Skills.get('intelligence');
+		let wisdom = Skills.get('wisdom');
+		let charisma = Skills.get('charisma');
 
 		const f = formatNumber;
 		const modifier = (stat) => {
@@ -634,12 +653,12 @@ let commands = {
 			}
 			return result;
 		};
-		log(`Strength:     ${f(strength)} -   ${modifier(strength)}`);
-		log(`Dexterity:    ${f(dexterity)} -   ${modifier(dexterity)}`);
-		log(`Constitution: ${f(constitution)} -   ${modifier(constitution)}`);
-		log(`Intelligence: ${f(intelligence)} -   ${modifier(intelligence)}`);
-		log(`Wisdom:       ${f(wisdom)} -   ${modifier(wisdom)}`);
-		log(`Charisma:     ${f(charisma)} -   ${modifier(charisma)}`);
+		log(`Strength:     ${f(strength.score)} -   ${strength.modifier}`);
+		log(`Dexterity:    ${f(dexterity.score)} -   ${dexterity.modifier}`);
+		log(`Constitution: ${f(constitution.score)} -   ${constitution.modifier}`);
+		log(`Intelligence: ${f(intelligence.score)} -   ${intelligence.modifier}`);
+		log(`Wisdom:       ${f(wisdom.score)} -   ${wisdom.modifier}`);
+		log(`Charisma:     ${f(charisma.score)} -   ${charisma.modifier}`);
 		return log();
 	},
 
