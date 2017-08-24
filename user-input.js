@@ -49,6 +49,7 @@ let UserInput = new UserInputEmitter();
 
 rl.on('line', line => {
 	// If the logger is currently outputting something, don't process commands
+	rl.pause();
 	if (log()) {
 		return;
 	}
@@ -58,10 +59,14 @@ rl.on('line', line => {
 
 	if (log()) {
 		// If the command resulted in some logging, wait for it to complete
-		log().then(() => UserInput.prompt());
+		log().then(() => {
+			UserInput.prompt();
+			rl.resume();
+		});
 	} else {
 		// Otherwise, allow the user to immediately input another command
 		UserInput.prompt();
+		rl.resume();
 	}
 })
 .on('close', (...args) => UserInput.emit('close', ...args));
