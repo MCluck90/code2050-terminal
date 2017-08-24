@@ -1,19 +1,12 @@
 'use strict';
 
 const chalk = require('chalk');
-const readline = require('readline');
 const parseSentence = require('minimist-string');
-const autocomplete = require('./autocomplete')
 const character = require('./character');
 const commands = require('./commands');
 const log = require('./logger');
+const userInput = require('./user-input');
 const argv = parseSentence(process.argv.join(' '));
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout,
-	prompt: '> ',
-	completer: autocomplete
-});
 
 // Load character data from a given file or the default
 character.load(argv.o || argv.open || './character.json');
@@ -25,6 +18,7 @@ const bootstep = (title, dots, delay) => () => {
 		.then(() => log.success('OK'));
 };
 
+// Show a fake boot sequence
 const initializeOS = () => {
 	bootstep('Initializing OS', 11, 200)()
 		.then(bootstep('Activating daemon', 9, 100))
@@ -34,46 +28,24 @@ const initializeOS = () => {
 		.then(start);
 };
 
+// Allow the user to skip the fake boot sequence
 if (process.argv.indexOf('--fast-boot') > -1 || process.argv.indexOf('-f') > -1) {
 	start();
 } else {
 	initializeOS();
 }
 
+// Start prompting for input
 function start() {
-	rl.prompt();
+	userInput.prompt();
 
-	let outputPromise = null;
-
-	rl
-	.on('line', (line) => {
-		if (outputPromise) {
-			return;
-		}
-
-		line = line.trim();
-		let sentence = parseSentence(line);
-		let command = sentence._[0];
-		let positionalArgs = sentence._.slice(1);
-		let flags = Object.assign({}, sentence);
-		delete flags._;
-		let negativeModifier = line.match(/-\d+/);
-		if (negativeModifier) {
-			positionalArgs.unshift(negativeModifier[0]);
-		}
+	userInput
+	.on('command', ({ command, flags, positionalArgs }) => {
+		// Process commands from the user
 		if (commands[command]) {
-			outputPromise = commands[command](flags, ...positionalArgs);
+			commands[command](flags, ...positionalArgs);
 		} else {
-			outputPromise = commands._field(command, flags, ...positionalArgs);
-		}
-
-		if (outputPromise) {
-			outputPromise.then(() => {
-				outputPromise = null;
-				rl.prompt();
-			});
-		} else {
-			rl.prompt();
+			commands._field(command, flags, ...positionalArgs);
 		}
 	})
 	.on('close', () => {
