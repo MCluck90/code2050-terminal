@@ -62,6 +62,7 @@
 		"Common clothes",
 		"Hacker's Rig"
 	],
+	"alt_inventory": [],
 	"weapons": {
 		"Unarmed": {
 			"name": "Unarmed",

@@ -29,7 +29,8 @@ const roll = (dieType, numberOfTimes) => {
 	return {
 		rolls: results,
 		sum,
-		average
+		average,
+		dropLowest: sum - Math.min(...results)
 	}
 };
 
@@ -234,6 +235,10 @@ let commands = {
 		} else {
 			return log('Unknown command: ' + field);
 		}
+	},
+
+	armor_class() {
+		return log(character.armor_class + Skills.modifier('dex'));
 	},
 
 	attack(flags, weapon) {
@@ -475,6 +480,10 @@ let commands = {
 		return log();
 	},
 
+	initiative() {
+		return log(Skills.modifier('dex'));
+	},
+
 	/**
 	 * Load character data from a file
 	 * @param {object} flags 
@@ -537,6 +546,10 @@ let commands = {
 		return log();
 	},
 
+	passive_perception() {
+		log(`${10 + Skills.modifier('wisdom')}`);
+	},
+
 	proficiencies() {
 		return log(character.proficiencies.join('\n'));
 	},
@@ -548,8 +561,13 @@ let commands = {
 
 		if (typeof stat === 'number') {
 			let numOfDice = stat;
-			numOfDice = numOfDice || 1;
-			return log(`${numOfDice}d${dieType}: ${roll(dieType, numOfDice).sum}`);
+			let rollType = (flags['drop-lowest'] || flags.d) ? 'dropLowest' : 'sum';
+			if (rollType === 'dropLowest') {
+				log('Drop the lowest');
+			}
+			let result = roll(dieType, numOfDice);
+			log(`Rolls: ${result.rolls.join(', ')}`);
+			return log(`${numOfDice}d${dieType}: ${result[rollType]}`);
 		}
 
 		flags.inspiration = flags.i;
@@ -673,8 +691,14 @@ let commands = {
 		Object.keys(weapons)
 			.map(name => Object.assign({}, weapons[name], { name }))
 			.forEach(weapon => {
-				log(`${weapon.name}: ${weapon.stat} - ${weapon.dice[0]}d${weapon.dice[1]}`);
+				log.fast(`${weapon.name}: ${weapon.stat} - ${weapon.dice[0]}d${weapon.dice[1]}`);
 				log(`- ${weapon.description[0]}`);
+				if (weapon.properties && weapon.properties.length) {
+					log(`- ${weapon.properties.join(', ')}`);
+				}
+				log(`- Base damage: ${weapon.base_damage}`);
+				log(`- Type: ${weapon.weapon_type}/${weapon.damage_type}`);
+				log(`- Stat: ${weapon.stat}`);
 				weapon.description.slice(1).forEach(line => log(`  ${line}`));
 			});
 		return log();
