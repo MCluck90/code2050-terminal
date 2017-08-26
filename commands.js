@@ -541,9 +541,15 @@ let commands = {
 		return log(character.proficiencies.join('\n'));
 	},
 
-	roll(flags, stat) {
+	roll(flags, stat, dieType) {
 		if (!stat) {
 			return log(`Luck: ${rolld20()}`);
+		}
+
+		if (typeof stat === 'number') {
+			let numOfDice = stat;
+			numOfDice = numOfDice || 1;
+			return log(`${numOfDice}d${dieType}: ${roll(dieType, numOfDice).sum}`);
 		}
 
 		flags.inspiration = flags.i;
