@@ -43,9 +43,19 @@ function start() {
 	.on('command', ({ command, flags, positionalArgs }) => {
 		// Process commands from the user
 		if (commands[command]) {
+			// For now, default to pulling from the Commands object
 			commands[command](flags, ...positionalArgs);
 		} else {
-			commands._field(command, flags, ...positionalArgs);
+			try {
+				let cmd = require(`./file-system/${command}`)
+				cmd(flags, ...positionalArgs);
+			} catch(e) {
+				if (e.code === 'MODULE_NOT_FOUND') {
+					commands._field(command, flags, ...positionalArgs);
+				} else {
+					throw e;
+				}
+			}
 		}
 	})
 	.on('close', () => {

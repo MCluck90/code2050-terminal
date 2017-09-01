@@ -237,41 +237,6 @@ let commands = {
 		}
 	},
 
-	alignment(flags) {
-		if (!flags.m && !flags.modify) {
-			return log(character.alignment);
-		}
-
-		log('Choose an alignment:');
-		const alignments = [
-			'lawful good',    'neutral good', 'chaotic good',
-			'lawful neutral', 'true neutral', 'chaotic neutral',
-			'lawful evil',    'neutral evil', 'chaotic evil'
-		];
-		const shortcuts = [
-			'lg', 'ng', 'cg',
-			'ln', 'tr', 'cn',
-			'le', 'ne', 'ce'
-		];
-		log.table(alignments.map((a, i) => `${a} (${shortcuts[i]})`));
-		userInput.enterBlock('alignment = ', (line) => {
-			line = line.trim().toLowerCase().replace(/\s\s+/g, ' ');
-			let newAlignment;
-			if (alignments.indexOf(line) > -1) {
-				newAlignment = line;
-			} else if (shortcuts.indexOf(line) > -1) {
-				newAlignment = alignments[shortcuts.indexOf(line)];
-			}
-			if (newAlignment) {
-				character.alignment = newAlignment;
-				log.success(`Changed alignment to ${newAlignment}`);
-				userInput.exitBlock();
-			} else {
-				log.error('Please enter one of the available alignments');
-			}
-		});
-	},
-
 	armor_class() {
 		return log(character.armor_class + Skills.modifier('dex'));
 	},
