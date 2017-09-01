@@ -15,6 +15,8 @@ const rl = readline.createInterface({
 class UserInputEmitter extends EventEmitter {
 	constructor() {
 		super();
+		this._blocks = [];
+		this._blockID = 0;
 	}
 
 	/**
@@ -43,7 +45,50 @@ class UserInputEmitter extends EventEmitter {
 	/**
 	 * Prompt the user for input
 	 */
-	prompt() { return rl.prompt(); }
+	prompt() {
+		return rl.prompt();
+	}
+
+	setPrompt(newPrompt) { 
+		rl.setPrompt(newPrompt);
+	}
+
+	resetPrompt() {
+		rl.setPrompt('> ');
+	}
+
+	enterBlock(prompt, cb) {
+		if (typeof prompt !== 'string') {
+			cb = prompt;
+			prompt = '> ';
+		}
+
+		this.setPrompt(prompt);
+
+		let id = this._blockID++;
+		this._blocks.push({
+			id,
+			prompt
+		});
+
+		this.addListener(id, cb);
+	}
+
+	exitBlock() {
+		let { id } = this._blocks.pop();
+		rl.removeAllListeners(id);
+
+		let { prompt = '> ' } = this.activeBlock;
+		this.setPrompt(prompt);
+	}
+
+	get activeBlock() {
+		return this._blocks[this._blocks.length - 1] || {};
+	}
+
+	get isInABlock() {
+		return this._blocks.length > 0;
+	}
 }
 let UserInput = new UserInputEmitter();
 
@@ -54,8 +99,12 @@ rl.on('line', line => {
 		return;
 	}
 
-	// Alert everyone that a command has been processed
-	UserInput.emit('command', UserInput.parseCommand(line));
+	if (UserInput.isInABlock) {
+		UserInput.emit(UserInput.activeBlock.id, line);
+	} else {
+		// Alert everyone that a command has been processed
+		UserInput.emit('command', UserInput.parseCommand(line));
+	}
 
 	if (log()) {
 		// If the command resulted in some logging, wait for it to complete
