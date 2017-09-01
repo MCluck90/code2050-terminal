@@ -55,6 +55,58 @@ function log(msg, newline = true, delay = 20) {
 	return promise;
 }
 
+/**
+ * Output a table similar to hit tab twice in the shell
+ * @param {Array<string>} items Strings of each item
+ * @param {number} [delay=5] How much to delay between printing characters
+ */
+function outputTable(items, delay = 5) {
+	const width = items.reduce((a, b) => a.length > b.length ? a : b).length + 2;
+	const columns = process.stdout.columns;
+	const maxColumns = Math.floor(columns / width);
+	if (!maxColumns || maxColumns === Infinity) {
+		maxColumns = 1;
+	}
+
+	function handleGroup(group, width, maxColumns) {
+		if (group.length === 0) {
+			return;
+		}
+
+		const minRows = Math.ceil(group.length / maxColumns);
+		for (let row = 0; row < minRows; row++) {
+			for (let col = 0; col < maxColumns; col++) {
+				let idx = row * maxColumns + col;
+				if (idx >= group.length) {
+					break;
+				}
+
+				let item = group[idx];
+				log(item, false, delay);
+				if (col < maxColumns - 1) {
+					for (let s = 0; s < width - item.length; s++) {
+						log(' ', false, delay);
+					}
+				}
+			}
+			log('', true, delay);
+		}
+		log('', true, delay);
+	}
+
+	let group = [];
+	items.forEach(item => {
+		if (item === '') {
+			handleGroup(group, width, maxColumns);
+			group = [];
+		} else {
+			group.push(item);
+		}
+	})
+	handleGroup(group, width, maxColumns);
+	return log();
+}
+
 log.fast = (msg, newline = true) => log(msg, newline, 10);
 log.slow = (msg, newline = true) => log(msg, newline, 100);
 log.success = (msg = 'SUCCESS', newline = true) => log.fast(chalk.bgGreen.black(msg), newline);
@@ -63,5 +115,6 @@ log.fail = (msg = 'FAIL', newline = true) => log.fast(chalk.bgRed.black(msg), ne
 log.criticalFail = () => log.fail('CRITICAL FAIL');
 log.ok = (msg, newline, delay) => log(`${chalk.bgGreen.black('OK')} ${msg}`, newline, delay);
 log.error = (msg, newline, delay) => log(`${chalk.bgRed.black('ERR')} ${msg}`, newline, delay);
+log.table = outputTable;
 
 module.exports = log;
